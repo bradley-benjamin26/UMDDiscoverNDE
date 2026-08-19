@@ -1,0 +1,69 @@
+.custom-search-bar-container .background-overlay {
+
+display: none;
+
+}
+
+/* Homepage search hero: white card behind the search controls */
+.custom-search-bar-container .search-bar-container {
+  background-color: #ffffff;
+  border-radius: 0 0 1rem 1rem;
+  padding: 1rem 1.5rem 1.25rem;
+  box-shadow: 0 1rem 1rem rgba(0, 0, 0, 0.2);
+  align-items: flex-start !important;
+}
+
+/* Top-align the scope dropdown with the search box instead of centering it against the taller wrapped row */
+.custom-search-bar-container .top-bar-container {
+  padding-top: 0 !important;
+}
+
+/* Bring the title into the same card as the search box */
+.custom-search-bar-container h1 {
+  color: #000000 !important;
+  align-self: stretch;
+  width: auto;
+  margin: 0 5.75rem -1px !important;
+  background-color: #ffffff;
+  border-radius: 1rem 1rem 0 0;
+  text-align: center;
+  padding: 0.5rem 0 0.25rem;
+  box-sizing: border-box;
+}
+
+.custom-search-bar-container [data-qa="natural-language-search-button"] .mdc-button__label span,
+.custom-search-bar-container [data-qa="advanced_search_button"] .mdc-button__label {
+  color: #000000 !important;
+}
+
+/* "Ask Anything" label is hidden on medium widths by a global .hide-sm rule; force it visible on the homepage hero */
+.custom-search-bar-container [data-qa="natural-language-search-button"] .hide-sm {
+  display: inline-block !important;
+}
+
+/* Move Ask Anything / Advanced Search below the search box instead of beside it */
+.custom-search-bar-container .flex-row.flex-1 {
+  flex-wrap: wrap;
+}
+
+.custom-search-bar-container .search-bar-wrapper.landing-page-search-bar-wrapper {
+  flex: 1 1 100%;
+}
+
+.custom-search-bar-container .flex-row.flex-1 > .flex-row.gap-075 {
+  flex: 1 1 100%;
+  margin-top: 0.5rem;
+  justify-content: flex-start;
+}
+
+/* Shrink the "Libraries Worldwide" scope dropdown so it stays on a single line */
+.custom-search-bar-container .search-dropdown-container-button {
+  width: auto !important;
+  min-width: 0 !important;
+  padding: 0 0.625rem !important;
+  font-size: 0.8125rem !important;
+}
+
+.custom-search-bar-container .search-dropdown-container-button mat-icon {
+  margin-left: 0.25rem;
+}
