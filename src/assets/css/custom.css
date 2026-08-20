@@ -18,12 +18,13 @@ display: none;
   padding-top: 0 !important;
 }
 
-/* Bring the title into the same card as the search box */
+/* Bring the title into the same card as the search box.
+   Width mirrors NDE's own .top-bar-container clamp() formula per breakpoint so the edges always match. */
 .custom-search-bar-container h1 {
   color: #000000 !important;
   align-self: stretch;
-  width: auto;
-  margin: 0 5.75rem -1px !important;
+  width: clamp(1088px, calc(85% - 27.2px), 1368px) !important;
+  margin: 0 auto -1px !important;
   background-color: #ffffff;
   border-radius: 1rem 1rem 0 0;
   text-align: center;
@@ -66,4 +67,23 @@ display: none;
 
 .custom-search-bar-container .search-dropdown-container-button mat-icon {
   margin-left: 0.25rem;
+}
+
+/* Keep the title width in sync with NDE's .top-bar-container width at every breakpoint */
+@media only screen and (min-width: 960px) and (max-width: 1279.98px) {
+  .custom-search-bar-container h1 {
+    width: clamp(912px, calc(85% - 27.2px), 1088px) !important;
+  }
+}
+
+@media only screen and (min-width: 600px) and (max-width: 959.98px) {
+  .custom-search-bar-container h1 {
+    width: clamp(288px, calc(88.4254% - 28.3px), 848px) !important;
+  }
+}
+
+@media only screen and (max-width: 599.98px) {
+  .custom-search-bar-container h1 {
+    width: 100% !important;
+  }
 }
