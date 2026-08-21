@@ -13,6 +13,10 @@ display: none;
   align-items: flex-start !important;
 }
 
+.available-at-button .mdc-button__label {
+  font-size: 1.15rem !important;
+}
+
 /* Top-align the scope dropdown with the search box instead of centering it against the taller wrapped row */
 .custom-search-bar-container .top-bar-container {
   padding-top: 0 !important;
@@ -50,6 +54,17 @@ display: none;
 .custom-search-bar-container .search-bar-wrapper.landing-page-search-bar-wrapper {
   flex: 1 1 100%;
 }
+nde-record-summary {
+    border-top: 1px solid #7f7f7f;
+}
+
+.quicklink-button.mat-mdc-button {
+    font-size: 1.15rem !important;
+}
+
+[data-qa="brief_result_source"] {
+    display: none !important;
+}
 
 .custom-search-bar-container .flex-row.flex-1 > .flex-row.gap-075 {
   flex: 1 1 100%;
@@ -67,6 +82,13 @@ display: none;
 
 .custom-search-bar-container .search-dropdown-container-button mat-icon {
   margin-left: 0.25rem;
+}
+
+.homepage-card-note {
+  display: block;
+  margin-top: 0.25rem !important;
+  font-size: 0.875rem !important;
+  color: hsl(0, 3%, 6%) !important;
 }
 
 /* Keep the title width in sync with NDE's .top-bar-container width at every breakpoint */
