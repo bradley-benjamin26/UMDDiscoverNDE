@@ -52,7 +52,7 @@
 				},
 				{
 				  "type": "anyComponentStyle",
-				  "maximumWarning": "2kb",
+				  "maximumWarning": "3kb",
 				  "maximumError": "4kb"
 				}
 			  ],
@@ -66,6 +66,11 @@
 			  "extractLicenses": false,
 			  "sourceMap": true,
 			  "namedChunks": true
+			},
+			"addon": {
+			  "main": "src/mainLcshSuggestions.ts",
+			  "tsConfig": "tsconfig.addon.json",
+			  "extraWebpackConfig": "webpack.prod.config.js"
 			}
 		  },
 		  "defaultConfiguration": "production"

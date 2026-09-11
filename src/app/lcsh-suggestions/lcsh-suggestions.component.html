@@ -1,0 +1,70 @@
+<ng-container *ngIf="state$ | async as state">
+  <section *ngIf="state.status !== 'idle'" class="lcsh-suggestions" aria-labelledby="lcsh-suggestions-title">
+    <div class="lcsh-suggestions__heading">
+      <h2 id="lcsh-suggestions-title">
+        <button
+          class="lcsh-suggestions__toggle"
+          type="button"
+          [attr.aria-expanded]="isExpanded"
+          aria-controls="lcsh-suggestions-content"
+          (click)="toggleExpanded()"
+        >
+          <span>Suggested Library of Congress subjects</span>
+          <span class="lcsh-suggestions__chevron" aria-hidden="true"></span>
+        </button>
+      </h2>
+      <span *ngIf="state.status === 'loading'" role="status">Finding subjects...</span>
+    </div>
+
+    <div *ngIf="isExpanded" id="lcsh-suggestions-content">
+      <p *ngIf="state.status === 'error'" role="status">
+        Subject suggestions are temporarily unavailable.
+      </p>
+
+      <ul *ngIf="state.status === 'ready' && state.suggestions.length">
+        <li *ngFor="let suggestion of state.suggestions">
+          <button type="button" (click)="openAddSearchTerm(suggestion)">
+            <span>{{ suggestion.label }}</span>
+            <small>{{ suggestion.explanation }}</small>
+          </button>
+        </li>
+      </ul>
+
+      <p *ngIf="state.status === 'ready' && !state.suggestions.length">
+        No additional controlled subjects were found for “{{ state.query }}”.
+      </p>
+    </div>
+  </section>
+</ng-container>
+
+<div *ngIf="selectedSuggestion" class="lcsh-dialog-backdrop" (click)="closeAddSearchTerm()">
+  <section
+    class="lcsh-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="lcsh-dialog-title"
+    (click)="$event.stopPropagation()"
+  >
+    <button class="lcsh-dialog__close" type="button" aria-label="Close" (click)="closeAddSearchTerm()">
+      &times;
+    </button>
+    <h2 id="lcsh-dialog-title">Add search term</h2>
+    <p class="lcsh-dialog__term">{{ selectedSuggestion.label }}</p>
+    <p>Choose how to combine this subject with your current search.</p>
+    <a
+      class="lcsh-dialog__help"
+      href="https://lib.guides.umd.edu/umd-discover/boolean"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Learn more about Boolean searching
+    </a>
+    <div class="lcsh-dialog__actions">
+      <button type="button" (click)="addSubject('AND')">AND</button>
+      <button type="button" (click)="addSubject('OR')">OR</button>
+    </div>
+    <button class="lcsh-dialog__new-search" type="button" (click)="startNewSubjectSearch()">
+      Start new search
+    </button>
+  </section>
+</div>

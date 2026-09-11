@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/addon",
+    "types": []
+  },
+  "files": [
+    "src/mainLcshSuggestions.ts",
+    "src/bootstrapLcshSuggestions.ts"
+  ],
+  "include": [
+    "src/**/*.d.ts"
+  ]
+}
