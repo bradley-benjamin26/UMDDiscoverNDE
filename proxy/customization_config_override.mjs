@@ -1,11 +1,11 @@
 export const customizationConfigOverride = {
-  "favIcon": "custom/MOCKINST-MOCKVID/assets/images/favicon.ico",
-  "libraryLogo": "custom/MOCKINST-MOCKVID/assets/images/library-logo.png",
+  "favIcon": "custom/01USMAI_UMCP-NDE/assets/images/favicon.ico",
+  "libraryLogo": "custom/MOCKINST-MOCKVID/assets/images/umdDiscoverlogo.svg",
   "viewSvg": "custom/MOCKINST-MOCKVID/assets/icons/custom_icons.svg",
   "homepage": {
     "homepageBGImage": "custom/01USMAI_UMCP-NDE/assets/images/McKeldinLibrary.jpg",
     "html": {
-      "en": "custom/MOCKINST-MOCKVID/assets/homepage/homepage_en.html",
+      "en": "custom/01USMAI_UMCP-NDE/assets/homepage/homepage_en.html",
       "he": "custom/MOCKINST-MOCKVID/assets/homepage/homepage_he.html",
       "ar": "custom/MOCKINST-MOCKVID/assets/homepage/homepage_ar.html",
       "fr": "custom/MOCKINST-MOCKVID/assets/homepage/homepage_fr.html",

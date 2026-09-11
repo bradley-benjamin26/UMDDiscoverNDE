@@ -561,12 +561,12 @@ ul.social-media-list li {
     }
 }
 
-.heading h1 {
-    font-family: Interstate;
-    font-size: 2rem;
-    font-style: normal;
-    font-weight: 700;
-    line-height: 2.08rem;
+.heading h1, .background-overlay {
+    font-family: Interstate !important;
+    font-size: 2rem !important;
+    font-style: normal !important;
+    font-weight: 700 !important;
+    line-height: 2.08rem !important;
 }
 
 .heading h2 {

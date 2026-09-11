@@ -1388,12 +1388,12 @@ div:has(> table.table) {
 }
 
 /* heading, style follow heading component */
-.wysiwyg-editor h1 {
-  font-family: Interstate;
-  font-size: 2rem;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 2.08rem;
+.wysiwyg-editor h1{
+  font-family: Interstate !important;
+  font-size: 2rem !important;
+  font-style: normal !important;
+  font-weight: 700 !important;
+  line-height: 2.08rem !important;
 }
 
 .wysiwyg-editor h2 {

@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-	"prestart": "node prebuild.js",
+    "prestart": "node prebuild.js",
     "start:no-prebundle": "ng serve --prebundle=false",
     "start:proxy": "ng serve --proxy-config ./proxy/proxy.conf.mjs",
     "build": "ng build",
@@ -33,6 +33,9 @@
     "@ngrx/store-devtools": "^18.1.0",
     "@ngx-translate/core": "^15.0.0",
     "@ngx-translate/http-loader": "^8.0.0",
+    "@universityofmaryland/web-components-library": "^1.19.5",
+    "@universityofmaryland/web-elements-library": "^1.7.4",
+    "@universityofmaryland/web-styles-library": "^1.8.17",
     "@webcomponents/custom-elements": "^1.6.0",
     "dotenv": "^16.4.5",
     "rxjs": "~7.8.0",

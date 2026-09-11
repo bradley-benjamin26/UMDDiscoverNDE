@@ -11,3 +11,11 @@ headingLinks.forEach((link) => {
     headingLinkIcon.classList.add("internal");
   }
 });
+document.addEventListener('click', (event) => {
+  const link = event.target.closest('#skip-h2-button');
+  if (!link) return;
+
+  event.preventDefault();
+
+  document.querySelector('button.skip-h2-button')?.click();
+});

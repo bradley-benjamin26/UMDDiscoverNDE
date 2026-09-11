@@ -1,6 +1,7 @@
 @use "src/app/styles/nde-variables" as vars;
 @use "src/app/styles/nde-mixing" as mixing;
 
+
 .main-landing-page {
   width: vars.$responsiveWidth;
   @include vars.set-responsive-width;
@@ -12,7 +13,6 @@
   @include mixing.respond-to('xsmall') {
     width: 100%;
   }
-
 
   .menu-container {
     .menu {

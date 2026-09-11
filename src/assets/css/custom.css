@@ -34,6 +34,11 @@ display: none;
   text-align: center;
   padding: 0.5rem 0 0.25rem;
   box-sizing: border-box;
+  font-family: "Barlow Condensed","Interstate" !important;
+  font-style: italic !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06rem !important;
+  text-transform: uppercase !important;
 }
 
 .custom-search-bar-container [data-qa="natural-language-search-button"] .mdc-button__label span,

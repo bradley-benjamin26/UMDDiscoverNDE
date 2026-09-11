@@ -1,0 +1,47 @@
+.umd-skip-content {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 2147483647;
+
+  padding: 0.5rem 1rem;
+  margin: 0;
+
+  color: var(--black);
+  background-color: var(--white);
+  border: 2px solid var(--maryland-yellow);
+  border-radius: 0.125rem;
+
+  font: inherit;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+/* Hide only while it does not have focus. */
+.umd-skip-content:not(:focus):not(:active) {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  white-space: nowrap;
+}
+
+/* Explicit visible focus treatment. */
+.umd-skip-content:focus,
+.umd-skip-content:focus-visible {
+  clip: auto;
+  clip-path: none;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  padding: 0.5rem 1rem;
+  white-space: normal;
+
+  outline: 3px solid var(--maryland-yellow);
+  outline-offset: 3px;
+}
