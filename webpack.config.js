@@ -14,7 +14,7 @@ module.exports = {
   context: path.resolve(__dirname), // Sets the context to the directory where webpack.config.js is
   output: {
     uniqueName: "customModule",
-    publicPath: 'auto',
+    publicPath: 'http://localhost:4201/',
   },
   optimization: {
     minimize: true,
