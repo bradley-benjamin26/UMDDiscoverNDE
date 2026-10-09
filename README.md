@@ -92,7 +92,7 @@ There are two options for setting up your local development environment: configu
     ```bash
     npm run start:proxy
     ```
-  - Open your browser on port 4201 to see your changes. e.g: http://localhost:4201/nde/home?vid=EXLDEV1_INST:NDE&lang=en
+  - Open your browser on port 4201 to see your changes. e.g: http://localhost:4201/nde/home?vid=01USMAI_UMCP:NDE&lang=en
 
   
 - **Option 2: Parameter on NDE URL**:
@@ -104,7 +104,7 @@ There are two options for setting up your local development environment: configu
       ```
       useLocalCustomPackage=true
       ```
-      For example: `https://sqa-na02.alma.exlibrisgroup.com/nde/home?vid=EXLDEV1_INST:NDE&useLocalCustomPackage=true`
+      For example: `https://sqa-na02.alma.exlibrisgroup.com/nde/home?vid=01USMAI_UMCP:NDE&useLocalCustomPackage=true`
     - This setting assumes that your local development environment is running on the default port `4201`.
 
   

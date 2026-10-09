@@ -66,11 +66,6 @@
 			  "extractLicenses": false,
 			  "sourceMap": true,
 			  "namedChunks": true
-			},
-			"addon": {
-			  "main": "src/mainLcshSuggestions.ts",
-			  "tsConfig": "tsconfig.addon.json",
-			  "extraWebpackConfig": "webpack.prod.config.js"
 			}
 		  },
 		  "defaultConfiguration": "production"

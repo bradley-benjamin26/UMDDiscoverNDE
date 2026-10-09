@@ -1,5 +1,10 @@
 <ng-container *ngIf="state$ | async as state">
-  <section *ngIf="state.status !== 'idle'" class="lcsh-suggestions" aria-labelledby="lcsh-suggestions-title">
+  <section
+    *ngIf="state.status !== 'idle'"
+    class="lcsh-suggestions"
+    aria-labelledby="lcsh-suggestions-title"
+    [attr.aria-busy]="state.status === 'loading'"
+  >
     <div class="lcsh-suggestions__heading">
       <h2 id="lcsh-suggestions-title">
         <button
@@ -16,14 +21,17 @@
       <span *ngIf="state.status === 'loading'" role="status">Finding subjects...</span>
     </div>
 
-    <div *ngIf="isExpanded" id="lcsh-suggestions-content">
-      <p *ngIf="state.status === 'error'" role="status">
+    <div *ngIf="isExpanded" id="lcsh-suggestions-content" aria-live="polite">
+      <div *ngIf="state.status === 'error'" class="lcsh-suggestions__error" role="alert">
+        <p>
         Subject suggestions are temporarily unavailable.
-      </p>
+        </p>
+        <button type="button" (click)="retry()">Retry</button>
+      </div>
 
       <ul *ngIf="state.status === 'ready' && state.suggestions.length">
         <li *ngFor="let suggestion of state.suggestions">
-          <button type="button" (click)="openAddSearchTerm(suggestion)">
+          <button type="button" (click)="openAddSearchTerm(suggestion, $event)">
             <span>{{ suggestion.label }}</span>
             <small>{{ suggestion.explanation }}</small>
           </button>
@@ -39,10 +47,12 @@
 
 <div *ngIf="selectedSuggestion" class="lcsh-dialog-backdrop" (click)="closeAddSearchTerm()">
   <section
+    #dialog
     class="lcsh-dialog"
     role="dialog"
     aria-modal="true"
     aria-labelledby="lcsh-dialog-title"
+    tabindex="-1"
     (click)="$event.stopPropagation()"
   >
     <button class="lcsh-dialog__close" type="button" aria-label="Close" (click)="closeAddSearchTerm()">
@@ -60,8 +70,8 @@
       Learn more about Boolean searching
     </a>
     <div class="lcsh-dialog__actions">
-      <button type="button" (click)="addSubject('AND')">AND</button>
-      <button type="button" (click)="addSubject('OR')">OR</button>
+      <button type="button" (click)="addSubject('AND')">Add with AND</button>
+      <button type="button" (click)="addSubject('OR')">Add with OR</button>
     </div>
     <button class="lcsh-dialog__new-search" type="button" (click)="startNewSubjectSearch()">
       Start new search

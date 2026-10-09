@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, HostListener, Inject, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, Inject, OnDestroy, ViewChild } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { BehaviorSubject, catchError, debounceTime, distinctUntilChanged, filter, map, of, startWith, Subject, switchMap, takeUntil } from 'rxjs';
+import { BehaviorSubject, catchError, combineLatest, debounceTime, distinctUntilChanged, filter, map, of, startWith, Subject, switchMap, takeUntil } from 'rxjs';
 import { SHELL_ROUTER } from '../injection-tokens';
 import { LcshSuggestion, LcshSuggestionsService } from './lcsh-suggestions.service';
 import { PrimoResultEvidenceService } from './primo-result-evidence.service';
@@ -98,11 +98,15 @@ export function appendPrimoSubjectQuery(
 export class LcshSuggestionsComponent implements OnDestroy {
   private readonly destroy$ = new Subject<void>();
   private readonly url$ = new BehaviorSubject(this.shellRouter.url);
+  private readonly retry$ = new BehaviorSubject(0);
+  private dialogTrigger: HTMLElement | null = null;
+  private previousBodyOverflow = '';
 
-  readonly state$ = this.url$.pipe(
-    distinctUntilChanged(),
+  @ViewChild('dialog') private dialog?: ElementRef<HTMLElement>;
+
+  readonly state$ = combineLatest([this.url$.pipe(distinctUntilChanged()), this.retry$]).pipe(
     debounceTime(250),
-    switchMap(url => {
+    switchMap(([url]) => {
       const query = extractPrimoSearchTerm(url);
       const currentQuery = getPrimoQuery(url);
       if (query.length < 2) {
@@ -137,16 +141,30 @@ export class LcshSuggestionsComponent implements OnDestroy {
     ).subscribe(event => this.url$.next(event.urlAfterRedirects));
   }
 
-  openAddSearchTerm(suggestion: LcshSuggestion): void {
+  openAddSearchTerm(suggestion: LcshSuggestion, event?: Event): void {
+    this.dialogTrigger = event?.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+    this.previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     this.selectedSuggestion = suggestion;
+    setTimeout(() => this.dialog?.nativeElement.focus());
   }
 
   toggleExpanded(): void {
     this.isExpanded = !this.isExpanded;
   }
 
-  closeAddSearchTerm(): void {
+  closeAddSearchTerm(restoreFocus = true): void {
+    const trigger = this.dialogTrigger;
     this.selectedSuggestion = null;
+    this.dialogTrigger = null;
+    document.body.style.overflow = this.previousBodyOverflow;
+    if (restoreFocus) {
+      setTimeout(() => trigger?.focus());
+    }
+  }
+
+  retry(): void {
+    this.retry$.next(this.retry$.value + 1);
   }
 
   addSubject(operator: BooleanOperator): void {
@@ -176,6 +194,34 @@ export class LcshSuggestionsComponent implements OnDestroy {
     this.closeAddSearchTerm();
   }
 
+  @HostListener('document:keydown', ['$event'])
+  trapDialogFocus(event: KeyboardEvent): void {
+    const dialog = this.dialog?.nativeElement;
+    if (event.key !== 'Tab' || !this.selectedSuggestion || !dialog) {
+      return;
+    }
+
+    const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    ));
+    if (!focusable.length) {
+      event.preventDefault();
+      dialog.focus();
+      return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const activeElement = document.activeElement;
+    if (event.shiftKey && (activeElement === first || !dialog.contains(activeElement))) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && (activeElement === last || !dialog.contains(activeElement))) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   private getCurrentQuery(): string {
     const query = this.shellRouter.parseUrl(this.shellRouter.url).queryParams['query'];
     return typeof query === 'string' ? query : '';
@@ -186,12 +232,14 @@ export class LcshSuggestionsComponent implements OnDestroy {
     urlTree.queryParams = {
       ...urlTree.queryParams,
       query,
+      mode: 'advanced',
     };
-    this.closeAddSearchTerm();
+    this.closeAddSearchTerm(false);
     void this.shellRouter.navigateByUrl(urlTree);
   }
 
   ngOnDestroy(): void {
+    document.body.style.overflow = this.previousBodyOverflow;
     this.destroy$.next();
     this.destroy$.complete();
   }

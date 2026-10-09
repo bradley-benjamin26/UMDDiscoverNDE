@@ -1,26 +1,15 @@
-# LCSH Suggestions add-on
+# LCSH Suggestions customization
 
-This add-on reads the active Primo NDE `query` route parameter and requests matching Library of Congress Subject Headings from `id.loc.gov`. Selecting a suggestion starts an exact subject search in Primo.
+This component reads the active Primo NDE `query` route parameter and requests matching Library of Congress Subject Headings directly from `id.loc.gov`. It is included in the normal NDE customization package at `nde-search-results-top`.
 
 ## Build
 
 ```sh
-npm run build:addon
+npm run build
 ```
 
-Host the contents of `dist/LcshSuggestions` on an HTTPS server that permits cross-origin requests. In Alma Add-on Configuration, use:
+Upload `dist/01USMAI_UMCP-NDE.zip` in Alma under **Discovery > View List > Edit > Manage Customization Package**.
 
-- Add-on name: `LcshSuggestions`
-- Exposed module: `./LcshSuggestions`
-- Entry file: the hosted `remoteEntry.js`
-- Placement: `nde-search-results-top`
+No add-on configuration or separate backend is required. The browser sends bounded candidate subject phrases to the Library of Congress; full Primo records and user identifiers are not sent.
 
-Configure the add-on with the URL of the separately deployed backend:
-
-```json
-{
-	"apiBaseUrl": "https://your-lcsh-service.example.edu"
-}
-```
-
-The browser sends the query to this institutional service. The service extracts short candidate concepts before querying the Library of Congress API.
+The browser implementation uses per-session request caching and a three-second timeout. It depends on the Library of Congress continuing to permit cross-origin requests from Primo.

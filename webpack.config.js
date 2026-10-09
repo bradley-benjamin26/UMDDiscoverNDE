@@ -4,8 +4,6 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require("path");
 const webpack = require("webpack");
 const share = mf.share;
-const lcshAddonName = "LcshSuggestions";
-const isLcshAddonBuild = process.env.ADDON_BUILD === lcshAddonName;
 
 const sharedMappings = new mf.SharedMappings();
 sharedMappings.register(
@@ -15,7 +13,7 @@ sharedMappings.register(
 module.exports = {
   context: path.resolve(__dirname), // Sets the context to the directory where webpack.config.js is
   output: {
-    uniqueName: isLcshAddonBuild ? lcshAddonName : "customModule",
+    uniqueName: "customModule",
     publicPath: 'http://localhost:4201/',
   },
   optimization: {
@@ -60,11 +58,11 @@ module.exports = {
         library: { type: "module" },
 
         // For remotes (please adjust)
-        name: isLcshAddonBuild ? lcshAddonName : "customModule",
+        name: "customModule",
         filename: "remoteEntry.js",
-        exposes: isLcshAddonBuild
-          ? { './LcshSuggestions': './src/bootstrapLcshSuggestions.ts' }
-          : { './custom-module': './src/bootstrap.ts' },
+        exposes: {
+            './custom-module': './src/bootstrap.ts',
+        },
 
         // For hosts (please adjust)
         // remotes: {

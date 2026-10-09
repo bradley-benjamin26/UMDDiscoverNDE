@@ -4,7 +4,51 @@ const STOP_WORDS = new Set([
   'when', 'where', 'which', 'who', 'why', 'with',
 ]);
 
-export function normalizeQuery(query) {
+// Common LCSH free-floating subdivisions (e.g. "History", "Biography") describe how a
+// topic is treated, not the topic itself. Sent to the suggest API on their own, they
+// match huge numbers of unrelated headings (e.g. "history" -> "Nuclear warfare --
+// History"), so they're only used as part of a longer phrase, never as a standalone
+// single-word candidate, unless the whole query is just that one word.
+const GENERIC_SUBDIVISION_TERMS = new Set([
+  'bibliography', 'biography', 'chronology', 'congresses', 'criticism', 'dictionaries',
+  'directories', 'encyclopedias', 'fiction', 'handbooks', 'historiography', 'history',
+  'manuals', 'periodicals', 'sources', 'statistics', 'terminology', 'yearbooks',
+]);
+
+export type LcshRelationship = 'authorized' | 'alternate' | 'result-set' | 'narrower';
+
+export interface LcshSuggestion {
+  label: string;
+  uri: string;
+  relationship: LcshRelationship;
+  explanation: string;
+}
+
+export interface LcshHit {
+  aLabel?: string;
+  suggestLabel?: string;
+  uri: string;
+  relationship?: LcshRelationship;
+  parentLabel?: string;
+}
+
+export interface CandidateLookup {
+  candidate: string;
+  hits: LcshHit[];
+  source?: 'query' | 'result-set';
+  evidenceCount?: number;
+}
+
+export interface EvidenceCandidate {
+  candidate: string;
+  evidenceCount: number;
+}
+
+function extractAlternateLabel(suggestLabel = ''): string {
+  return suggestLabel.split(/\s*\(USE\b/i, 1)[0].trim();
+}
+
+export function normalizeQuery(query: string): string {
   return query
     .normalize('NFKC')
     .replace(/\b(?:AND|OR|NOT)\b/gi, ' ')
@@ -14,18 +58,12 @@ export function normalizeQuery(query) {
     .toLowerCase();
 }
 
-export function extractCandidateConcepts(query, maxCandidates = 5) {
-  const normalized = normalizeQuery(query);
-  const tokens = normalized
+export function extractCandidateConcepts(query: string, maxCandidates = 5): string[] {
+  const tokens = normalizeQuery(query)
     .split(' ')
     .filter(token => token.length > 1 && !STOP_WORDS.has(token));
-
-  if (!tokens.length) {
-    return [];
-  }
-
-  const candidates = [];
-  const addCandidate = candidate => {
+  const candidates: string[] = [];
+  const addCandidate = (candidate: string) => {
     if (candidate && !candidates.includes(candidate)) {
       candidates.push(candidate);
     }
@@ -36,12 +74,13 @@ export function extractCandidateConcepts(query, maxCandidates = 5) {
       addCandidate(tokens.slice(index, index + size).join(' '));
     }
   }
-
-  tokens.forEach(addCandidate);
+  tokens
+    .filter(token => tokens.length === 1 || !GENERIC_SUBDIVISION_TERMS.has(token))
+    .forEach(addCandidate);
   return candidates.slice(0, maxCandidates);
 }
 
-export function detectTitleLikeQuery(query, titles = []) {
+export function detectTitleLikeQuery(query: string, titles: string[] = []): boolean {
   const normalizedQuery = normalizeQuery(query);
   if (normalizedQuery.length < 4) {
     return false;
@@ -60,8 +99,8 @@ export function detectTitleLikeQuery(query, titles = []) {
   });
 }
 
-export function extractEvidenceCandidates(subjects = [], maxCandidates = 6) {
-  const counts = new Map();
+export function extractEvidenceCandidates(subjects: string[] = [], maxCandidates = 6): EvidenceCandidate[] {
+  const counts = new Map<string, EvidenceCandidate>();
   subjects.forEach(subject => {
     const label = subject.replace(/\s*--\s*/g, '--').trim();
     const normalized = normalizeQuery(label);
@@ -77,8 +116,8 @@ export function extractEvidenceCandidates(subjects = [], maxCandidates = 6) {
     .slice(0, maxCandidates);
 }
 
-export function rankLcshSuggestions(hitsByCandidate, limit = 5) {
-  const rankedByUri = new Map();
+export function rankLcshSuggestions(hitsByCandidate: CandidateLookup[], limit = 5): LcshSuggestion[] {
+  const rankedByUri = new Map<string, LcshSuggestion & { normalizedLabel: string; score: number }>();
 
   hitsByCandidate.forEach(({ candidate, hits, source = 'query', evidenceCount = 0 }, candidateIndex) => {
     const normalizedCandidate = normalizeQuery(candidate);
@@ -97,6 +136,26 @@ export function rankLcshSuggestions(hitsByCandidate, limit = 5) {
         normalizedLabel === normalizedCandidate ||
         normalizedLabel.startsWith(`${normalizedCandidate} `) && labelTokens.size <= candidateTokens.size + 1
       );
+
+      // A candidate word can appear inside many unrelated headings (e.g. "history"
+      // matches "Nuclear warfare -- History"). Require every word of the candidate
+      // phrase to appear in the heading (so a partial match like "history" alone can't
+      // stand in for "history sumo"), and require those matched words to make up most
+      // of the heading too, unless the match comes from real result-set evidence, a
+      // narrower-term lookup (already scoped to a relevant parent heading), or an
+      // alternate-label match (the query actually matched the non-preferred term, which
+      // can read nothing like the authorized label it maps to).
+      const alternateLabel = extractAlternateLabel(hit.suggestLabel);
+      const alternateTokens = new Set(normalizeQuery(alternateLabel).split(' '));
+      const alternateOverlap = [...candidateTokens].filter(token => alternateTokens.has(token)).length;
+      const labelCoverage = labelTokens.size ? overlap / labelTokens.size : 0;
+      const alternateCoverage = alternateLabel && alternateTokens.size ? alternateOverlap / alternateTokens.size : 0;
+      const passesLabel = overlap === candidateTokens.size && labelCoverage >= 0.5;
+      const passesAlternate = alternateOverlap === candidateTokens.size && alternateCoverage >= 0.5;
+      if (!evidenceMatch && hit.relationship !== 'narrower' && !passesLabel && !passesAlternate) {
+        return;
+      }
+
       const exactBonus = normalizedLabel === normalizedCandidate ? 100 : 0;
       const prefixBonus = normalizedLabel.startsWith(normalizedCandidate) ? 30 : 0;
       const authorizedBonus = hit.aLabel ? 10 : 0;
@@ -104,25 +163,26 @@ export function rankLcshSuggestions(hitsByCandidate, limit = 5) {
       const evidenceBonus = evidenceMatch ? 180 + Math.min(evidenceCount, 5) * 35 : 0;
       const relationshipBonus = hit.relationship === 'narrower' ? 40 : 0;
       const candidatePenalty = hit.relationship === 'narrower' ? 0 : candidateIndex * 40;
-      const score = exactBonus + prefixBonus + authorizedBonus + specificityBonus + overlap * 20 + evidenceBonus + relationshipBonus - candidatePenalty - hitIndex;
+      const score = exactBonus + prefixBonus + authorizedBonus + specificityBonus + overlap * 20 +
+        evidenceBonus + relationshipBonus - candidatePenalty - hitIndex;
       const existing = rankedByUri.get(hit.uri);
 
       if (!existing || existing.score < score) {
-        const alternateMatch = hit.suggestLabel && normalizeQuery(hit.suggestLabel) !== normalizeQuery(hit.aLabel || '');
+        const alternateMatch = alternateLabel && normalizeQuery(alternateLabel) !== normalizeQuery(hit.aLabel || '');
         const relationship = hit.relationship || (evidenceMatch ? 'result-set' : alternateMatch ? 'alternate' : 'authorized');
         const explanation = relationship === 'result-set'
           ? `Appears in ${evidenceCount} top ${evidenceCount === 1 ? 'result' : 'results'}`
           : relationship === 'narrower'
             ? `Narrower topic under ${hit.parentLabel}`
             : relationship === 'alternate'
-              ? `Authorized heading for “${hit.suggestLabel}”`
+              ? `Authorized heading for "${alternateLabel}"`
               : 'Matches your search concepts';
         rankedByUri.set(hit.uri, { label, normalizedLabel, uri: hit.uri, score, relationship, explanation });
       }
     });
   });
 
-  const rankedByLabel = new Map();
+  const rankedByLabel = new Map<string, LcshSuggestion & { normalizedLabel: string; score: number }>();
   [...rankedByUri.values()].forEach(suggestion => {
     const existing = rankedByLabel.get(suggestion.normalizedLabel);
     if (!existing || existing.score < suggestion.score) {
